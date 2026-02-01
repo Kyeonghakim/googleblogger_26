@@ -1,13 +1,15 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import { Settings as SettingsIcon, Check } from 'lucide-react';
 
 export default function Settings() {
   const [settings, setSettings] = useState({
-    defaultContentType: 'blog',
+    youtubeChannelId: '',
     seoKeywords: '',
   });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     loadSettings();
@@ -17,7 +19,7 @@ export default function Settings() {
     try {
       const data = await api.get('/api/settings');
       setSettings({
-        defaultContentType: data.defaultContentType || 'blog',
+        youtubeChannelId: data.youtubeChannelId || '',
         seoKeywords: data.seoKeywords || '',
       });
     } catch (err) {
@@ -30,9 +32,11 @@ export default function Settings() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setSuccess(false);
     try {
-      await api.put('/api/settings', settings);
-      alert('설정이 저장되었습니다.');
+      await api.post('/api/settings', settings);
+      setSuccess(true);
+      setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       alert('설정 저장 실패');
     } finally {
@@ -40,44 +44,59 @@ export default function Settings() {
     }
   };
 
-  if (loading) return <div className="text-gray-500">로딩 중...</div>;
+  if (loading) return <div className="p-8 text-slate-500">로딩 중...</div>;
 
   return (
-    <div className="max-w-2xl bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">설정</h2>
-      <form onSubmit={handleSave} className="space-y-6">
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <SettingsIcon className="w-6 h-6 text-slate-600" />
+        <h1 className="text-2xl font-semibold text-slate-900">설정</h1>
+      </div>
+      
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+        {success && (
+          <div className="bg-green-50 text-green-800 rounded-lg p-4">
+            설정이 저장되었습니다.
+          </div>
+        )}
+        
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">기본 콘텐츠 타입</label>
-          <select
-            value={settings.defaultContentType}
-            onChange={(e) => setSettings({ ...settings, defaultContentType: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white"
-          >
-            <option value="blog">블로그</option>
-            <option value="news">뉴스</option>
-            <option value="essay">에세이</option>
-          </select>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">SEO 기본 키워드 (쉼표로 구분)</label>
-          <input
-            type="text"
-            value={settings.seoKeywords}
-            onChange={(e) => setSettings({ ...settings, seoKeywords: e.target.value })}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="예: 기술, 개발, 리액트"
+          <label className="block text-sm font-medium text-slate-700 mb-2">YouTube 채널</label>
+          <input 
+            value={settings.youtubeChannelId}
+            onChange={(e) => setSettings({ ...settings, youtubeChannelId: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+            placeholder="채널 ID 또는 이름"
           />
         </div>
-        <div className="pt-4">
-          <button
-            type="submit"
+        
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">SEO 키워드</label>
+          <input 
+            value={settings.seoKeywords}
+            onChange={(e) => setSettings({ ...settings, seoKeywords: e.target.value })}
+            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900"
+            placeholder="쉼표로 구분"
+          />
+        </div>
+        
+        <div className="pt-4 border-t border-slate-200">
+          <button 
+            onClick={handleSave}
             disabled={saving}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+            className="bg-slate-900 text-white hover:bg-slate-800 rounded-lg px-4 py-2 font-medium transition-colors flex items-center gap-2 disabled:opacity-50"
           >
-            {saving ? '저장 중...' : '설정 저장'}
+            {saving ? (
+              <span>저장 중...</span>
+            ) : (
+              <>
+                <Check className="w-4 h-4" />
+                저장
+              </>
+            )}
           </button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
