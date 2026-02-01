@@ -229,7 +229,7 @@ export async function generatePost(
       
       const allImages = [];
       for (const keyword of imageKeywords) {
-        const images = await searchUnsplashImages(keyword, env.UNSPLASH_ACCESS_KEY, 1);
+        const images = await searchUnsplashImages(keyword, env.UNSPLASH_ACCESS_KEY, 2);
         allImages.push(...images);
       }
       
