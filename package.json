@@ -1,0 +1,13 @@
+{
+  "name": "260201_googleblogger",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest",
+    "wrangler": "^4.61.1"
+  },
+  "peerDependencies": {
+    "typescript": "^5"
+  }
+}
