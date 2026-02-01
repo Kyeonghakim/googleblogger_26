@@ -1,0 +1,8 @@
+name = "youtube-blogger"
+main = "src/index.ts"
+compatibility_date = "2024-04-03"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "youtube-blogger-db"
+database_id = "PLACEHOLDER-RUN-WRANGLER-D1-CREATE"
