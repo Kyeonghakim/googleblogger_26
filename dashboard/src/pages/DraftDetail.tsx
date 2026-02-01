@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import { ArrowLeft, Save, Send, Trash2 } from 'lucide-react';
 
 export default function DraftDetail() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [draft, setDraft] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [processing, setProcessing] = useState(false);
 
@@ -18,6 +20,7 @@ export default function DraftDetail() {
     try {
       const data = await api.get(`/api/drafts/${draftId}`);
       setDraft(data);
+      setTitle(data.title || '');
       setContent(data.content || '');
     } catch (err) {
       console.error(err);
@@ -30,7 +33,7 @@ export default function DraftDetail() {
   const handleSave = async () => {
     setProcessing(true);
     try {
-      await api.put(`/api/drafts/${id}`, { ...draft, content });
+      await api.put(`/api/drafts/${id}`, { ...draft, title, content });
       alert('저장되었습니다.');
     } catch (err) {
       alert('저장 실패');
@@ -39,7 +42,7 @@ export default function DraftDetail() {
     }
   };
 
-  const handleApprove = async () => {
+  const handlePublish = async () => {
     if (!confirm('이 글을 발행하시겠습니까?')) return;
     setProcessing(true);
     try {
@@ -52,61 +55,82 @@ export default function DraftDetail() {
     }
   };
 
-      const handleReject = async () => {
-      if (!confirm('이 글을 거절하시겠습니까?')) return;
-      setProcessing(true);
-      try {
-          await api.put(`/api/drafts/${id}`, { ...draft, status: 'rejected' });
-          navigate('/');
-      } catch (err) {
-          alert('거절 처리 실패');
-      } finally {
-          setProcessing(false);
-      }
+  const handleDelete = async () => {
+    if (!confirm('정말 삭제하시겠습니까?')) return;
+    setProcessing(true);
+    try {
+      await api.delete(`/api/drafts/${id}`);
+      navigate('/');
+    } catch (err) {
+      alert('삭제 실패');
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  if (loading) return <div className="text-gray-500">로딩 중...</div>;
-  if (!draft) return <div className="text-gray-500">글을 찾을 수 없습니다.</div>;
+  if (loading) return <div className="text-gray-500 p-8">로딩 중...</div>;
+  if (!draft) return <div className="text-gray-500 p-8">글을 찾을 수 없습니다.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-sm border border-gray-200">
-      <div className="flex justify-between items-start mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">{draft.title}</h2>
-        <div className="space-x-2">
-            <button
-            onClick={handleReject}
-            disabled={processing}
-            className="px-4 py-2 border border-red-200 text-red-600 rounded-md hover:bg-red-50 cursor-pointer disabled:opacity-50"
-            >
-            거절
-            </button>
-            <button
-            onClick={handleApprove}
-            disabled={processing}
-            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 cursor-pointer disabled:opacity-50"
-            >
-            승인 및 발행
-            </button>
-        </div>
+    <div className="space-y-6 max-w-5xl mx-auto p-6">
+      <div className="flex items-center gap-4">
+        <button 
+          onClick={() => navigate('/')} 
+          className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+        >
+          <ArrowLeft className="w-5 h-5 text-slate-600" />
+        </button>
+        <h1 className="text-2xl font-semibold text-slate-900">글 수정</h1>
       </div>
       
-      <div className="mb-6">
-        <label className="block text-sm font-medium text-gray-700 mb-2">내용 편집</label>
-        <textarea
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          className="w-full h-96 p-4 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 font-mono text-sm"
-        />
-      </div>
-
-      <div className="flex justify-end">
-        <button
-          onClick={handleSave}
-          disabled={processing}
-          className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 mr-2 cursor-pointer disabled:opacity-50"
-        >
-          임시 저장
-        </button>
+      <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">제목</label>
+          <input 
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow"
+          />
+        </div>
+        
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-2">내용</label>
+          <textarea 
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            rows={12} 
+            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-sm transition-shadow resize-y"
+          />
+        </div>
+        
+        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+          <button 
+            onClick={handleDelete}
+            disabled={processing}
+            className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+          >
+            <Trash2 className="w-4 h-4" />
+            삭제
+          </button>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={handleSave}
+              disabled={processing}
+              className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Save className="w-4 h-4" />
+              저장
+            </button>
+            <button 
+              onClick={handlePublish}
+              disabled={processing}
+              className="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            >
+              <Send className="w-4 h-4" />
+              발행
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

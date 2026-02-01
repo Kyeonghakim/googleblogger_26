@@ -4,6 +4,7 @@ export const api = {
   get: async (path: string) => request(path, 'GET'),
   post: async (path: string, body?: any) => request(path, 'POST', body),
   put: async (path: string, body?: any) => request(path, 'PUT', body),
+  delete: async (path: string) => request(path, 'DELETE'),
 };
 
 async function request(path: string, method: string, body?: any) {
