@@ -1,0 +1,27 @@
+Task 6 "AI 글 생성 Worker 개발" completed.
+
+Implemented:
+1. `src/workers/ai-generator.ts`:
+   - Fetches video title via YouTube Data API.
+   - Fetches transcript via `youtube-transcript`.
+   - Generates blog post using Gemini API (model: `gemini-1.5-flash`).
+   - Supports `informational` and `promotional` content types with specific prompt templates.
+   - Includes retry logic (max 3 retries) with exponential backoff.
+   - Saves draft to D1 database `drafts` table.
+   - Returns `{ draftId, title, preview }`.
+
+2. `src/index.ts`:
+   - Added `POST /api/generate-post` endpoint.
+   - Validates API keys and request body.
+   - Routes to `ai-generator.ts`.
+
+3. `src/types.ts`:
+   - Added `GEMINI_API_KEY` to `Env`.
+
+Files created/modified:
+- `src/workers/ai-generator.ts` (New)
+- `src/index.ts` (Modified)
+- `src/types.ts` (Modified)
+
+Verification:
+- `bun build` passed successfully.

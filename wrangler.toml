@@ -5,4 +5,7 @@ compatibility_date = "2024-04-03"
 [[d1_databases]]
 binding = "DB"
 database_name = "youtube-blogger-db"
-database_id = "PLACEHOLDER-RUN-WRANGLER-D1-CREATE"
+database_id = "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+
+[triggers]
+crons = ["0 0 * * *", "0 6 * * *"]
