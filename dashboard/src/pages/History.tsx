@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { api } from '../api';
+import { History as HistoryIcon, ExternalLink, Archive } from 'lucide-react';
 
 interface HistoryItem {
   id: string;
   title: string;
-  published_at: string;
+  published_at: string | number;
   status: string;
+  url?: string;
 }
 
 export default function History() {
@@ -27,42 +29,48 @@ export default function History() {
     }
   };
 
-  if (loading) return <div className="text-gray-500">로딩 중...</div>;
+  const formatDate = (dateInput: string | number) => {
+    const date = new Date(dateInput);
+    return date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+  };
+
+  if (loading) return <div className="text-slate-500 p-8">로딩 중...</div>;
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6 text-gray-800">발행 이력</h2>
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">제목</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">상태</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">날짜</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {history.map((item) => (
-              <tr key={item.id}>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{item.title}</td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                    item.status === 'published' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {item.status === 'published' ? '발행됨' : item.status}
-                  </span>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  {new Date(item.published_at).toLocaleString()}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-        {history.length === 0 && (
-           <div className="p-8 text-center text-gray-500">이력이 없습니다.</div>
-        )}
+    <div className="space-y-6">
+      <div className="flex items-center gap-3">
+        <HistoryIcon className="w-6 h-6 text-slate-600" />
+        <h1 className="text-2xl font-semibold text-slate-900">발행 이력</h1>
       </div>
+      
+      {history.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-16 text-slate-500">
+          <Archive className="w-12 h-12 mb-4" />
+          <p>발행 이력이 없습니다</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {history.map(item => (
+            <div key={item.id} className="bg-white rounded-xl shadow-sm p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium text-slate-900 mb-1">{item.title}</h3>
+                  <p className="text-sm text-slate-500">{formatDate(item.published_at)}</p>
+                </div>
+                <a 
+                  href={item.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className={`p-2 rounded-lg transition-colors ${item.url ? 'hover:bg-slate-100 text-slate-600' : 'text-slate-300 cursor-not-allowed'}`}
+                  onClick={(e) => !item.url && e.preventDefault()}
+                >
+                  <ExternalLink className="w-5 h-5" />
+                </a>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
