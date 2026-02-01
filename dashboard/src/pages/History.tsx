@@ -19,7 +19,7 @@ export default function History() {
   const loadHistory = async () => {
     try {
       const data = await api.get('/api/history');
-      setHistory(data.history || []);
+      setHistory(Array.isArray(data) ? data : data.history || []);
     } catch (err) {
       console.error(err);
     } finally {

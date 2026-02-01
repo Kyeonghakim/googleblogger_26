@@ -20,7 +20,7 @@ export default function Dashboard() {
   const loadDrafts = async () => {
     try {
       const data = await api.get('/api/drafts');
-      setDrafts(data.drafts || []);
+      setDrafts(Array.isArray(data) ? data : data.drafts || []);
     } catch (err) {
       console.error(err);
     } finally {

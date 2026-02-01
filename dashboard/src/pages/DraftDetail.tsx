@@ -43,7 +43,7 @@ export default function DraftDetail() {
     if (!confirm('이 글을 발행하시겠습니까?')) return;
     setProcessing(true);
     try {
-      await api.post('/api/publish', { id });
+      await api.post('/api/publish', { draftId: Number(id) });
       navigate('/');
     } catch (err) {
       alert('발행 실패');
