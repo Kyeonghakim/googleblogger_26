@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Lock } from 'lucide-react';
 import { api } from '../api';
 
 export default function Login() {
@@ -29,26 +30,27 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200 w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center text-gray-800">관리자 로그인</h1>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">비밀번호</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="비밀번호를 입력하세요"
-              required
-            />
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+            <Lock className="w-6 h-6 text-slate-600" />
           </div>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-          <button
+          <h1 className="text-2xl font-semibold text-slate-900">로그인</h1>
+        </div>
+        <form onSubmit={handleSubmit}>
+          <input 
+            type="password"
+            placeholder="비밀번호를 입력하세요"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 mb-4"
+          />
+          {error && <p className="text-red-600 text-sm mt-2 mb-4">{error}</p>}
+          <button 
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+            className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
           >
             {loading ? '로그인 중...' : '로그인'}
           </button>
