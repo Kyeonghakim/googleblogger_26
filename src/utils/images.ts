@@ -51,17 +51,20 @@ export function getYouTubeThumbnail(videoId: string, quality: 'default' | 'mediu
 export function insertImagesIntoContent(
   htmlContent: string,
   images: ImageResult[],
-  videoId: string
+  videoId?: string
 ): string {
-  const thumbnail = getYouTubeThumbnail(videoId, 'maxres');
+  let result = htmlContent;
   
-  const heroImageHtml = `
+  if (videoId) {
+    const thumbnail = getYouTubeThumbnail(videoId, 'maxres');
+    const heroImageHtml = `
 <figure style="margin: 0 0 2em 0;">
   <img src="${thumbnail}" alt="영상 썸네일" style="width: 100%; height: auto; border-radius: 8px;" />
 </figure>
 `;
-
-  let result = heroImageHtml + htmlContent;
+    result = heroImageHtml + result;
+  }
+  
   let insertCount = 0;
 
   const h2Matches = result.match(/<h2[^>]*>.*?<\/h2>/gi) || [];
@@ -86,30 +89,41 @@ export function insertImagesIntoContent(
       result = result.replace(h2Tag, imageHtml + h2Tag);
       insertCount++;
       
-      if (insertCount >= 5) break;
+      if (insertCount >= 2) break;
     }
   }
 
   // Paragraph fallback if not enough h2 tags
-  if (insertCount < 3 && images.length > insertCount) {
+  if (insertCount < 2 && images.length > insertCount) {
     const paragraphMatches = [...result.matchAll(/<\/p>/gi)];
+    
+    // Collect all insertion points first (every 3rd paragraph)
+    const insertionPoints: Array<{ matchIndex: number; matchLength: number; img: ImageResult }> = [];
     let pIndex = 0;
-    for (let i = insertCount; i < images.length && insertCount < 5; i++) {
-      // Insert after every 3rd paragraph
-      while (pIndex < paragraphMatches.length) {
-        if ((pIndex + 1) % 3 === 0) {
-          const match = paragraphMatches[pIndex];
-          const img = images[i];
-          if (match && img && typeof match.index === 'number') {
-            const imgHtml = `</p>\n<figure style="margin: 2em 0;"><img src="${img.url}" alt="${img.alt}" style="width: 100%; height: auto; border-radius: 8px;" /><figcaption style="text-align: center; font-size: 0.9em; color: #666; margin-top: 0.5em;">Photo by ${img.photographer} on Unsplash</figcaption></figure>`;
-            result = result.slice(0, match.index) + imgHtml + result.slice(match.index + match[0].length);
-            insertCount++;
-            pIndex++;
-            break;
-          }
+    let imgIndex = insertCount;
+    
+    while (pIndex < paragraphMatches.length && imgIndex < images.length && insertionPoints.length < (2 - insertCount)) {
+      if ((pIndex + 1) % 3 === 0) {
+        const match = paragraphMatches[pIndex];
+        const img = images[imgIndex];
+        if (match && img && typeof match.index === 'number') {
+          insertionPoints.push({ 
+            matchIndex: match.index, 
+            matchLength: match[0].length,
+            img 
+          });
+          imgIndex++;
         }
-        pIndex++;
       }
+      pIndex++;
+    }
+    
+    // Insert in REVERSE order to preserve indices (later positions first)
+    for (let i = insertionPoints.length - 1; i >= 0; i--) {
+      const { matchIndex, matchLength, img } = insertionPoints[i]!;
+      const imgHtml = `</p>\n<figure style="margin: 2em 0;"><img src="${img.url}" alt="${img.alt}" style="width: 100%; height: auto; border-radius: 8px;" /><figcaption style="text-align: center; font-size: 0.9em; color: #666; margin-top: 0.5em;">Photo by ${img.photographer} on Unsplash</figcaption></figure>`;
+      result = result.slice(0, matchIndex) + imgHtml + result.slice(matchIndex + matchLength);
+      insertCount++;
     }
   }
 
@@ -117,12 +131,10 @@ export function insertImagesIntoContent(
 }
 
 export async function generateImageKeywords(
-  apiKey: string,
+  ai: any,
   title: string,
   content: string
 ): Promise<string[]> {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
-  
   const prompt = `Based on this blog post about economics/finance, suggest 3 image search keywords in English.
 Return ONLY a JSON array of 3 strings, nothing else.
 
@@ -131,22 +143,13 @@ Content preview: ${content.substring(0, 500)}
 
 Example response: ["stock market graph", "business meeting", "money investment"]`;
 
-  const body = {
-    contents: [{ role: "user", parts: [{ text: prompt }] }],
-    generationConfig: { temperature: 0.3, maxOutputTokens: 100 }
-  };
-
   try {
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
+    const response = await ai.run('@cf/meta/llama-3.3-70b-instruct-fp8-fast', {
+      messages: [{ role: 'user', content: prompt }],
+      max_tokens: 100
+    }) as { response?: string };
 
-    if (!response.ok) return getDefaultKeywords();
-
-    const data = await response.json() as any;
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const text = response.response || '';
     
     const jsonMatch = text.match(/\[.*\]/s);
     if (jsonMatch) {

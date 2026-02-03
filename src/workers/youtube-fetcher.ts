@@ -1,9 +1,9 @@
-import { YoutubeTranscript } from 'youtube-transcript';
-import type { Env, VideoInfo, TranscriptItem } from '../types';
+import type { Env, VideoInfo } from '../types';
 
 const KEYWORDS = ["금리", "주식", "부동산", "투자", "경제", "Fed", "inflation", "S&P500"];
 const MAX_VIDEOS_PER_KEYWORD = 2;
 const SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
+const VIDEO_DETAILS_URL = 'https://www.googleapis.com/youtube/v3/videos';
 
 export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
   const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
@@ -26,8 +26,6 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
       const response = await fetch(url.toString());
       if (!response.ok) {
         console.error(`YouTube API error for keyword ${keyword}: ${response.status} ${response.statusText}`);
-        const text = await response.text();
-        console.error(`Response body: ${text}`);
         continue;
       }
 
@@ -50,32 +48,29 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
         }
 
         try {
-          const transcriptData = await YoutubeTranscript.fetchTranscript(videoId);
+          const details = await getVideoDetails(videoId, env.YOUTUBE_API_KEY);
           
-          if (!transcriptData || transcriptData.length === 0) {
-            console.log(`No transcript found for video ${videoId}`);
+          if (!details.description || details.description.length < 100) {
+            console.log(`Skipping video ${videoId} (description too short)`);
             continue;
           }
 
-          const transcript: TranscriptItem[] = transcriptData.map(t => ({
-            text: t.text,
-            duration: t.duration,
-            offset: t.offset
-          }));
-
           collectedVideos.push({
             videoId,
-            title: item.snippet.title,
-            description: item.snippet.description,
+            title: details.title || item.snippet.title,
+            description: details.description || item.snippet.description,
             channelTitle: item.snippet.channelTitle,
             publishedAt: item.snippet.publishedAt,
-            transcript
           });
           
-          console.log(`Collected video: ${item.snippet.title}`);
+          console.log(`Collected video: ${details.title || item.snippet.title}`);
 
-        } catch (transcriptError) {
-          console.log(`Failed to fetch transcript for video ${videoId}: ${transcriptError}`);
+          if (collectedVideos.length >= 2) {
+            return collectedVideos;
+          }
+
+        } catch (detailsError) {
+          console.log(`Failed to fetch details for video ${videoId}: ${detailsError}`);
         }
       }
     } catch (error) {
@@ -84,4 +79,28 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
   }
 
   return collectedVideos;
+}
+
+async function getVideoDetails(videoId: string, apiKey: string): Promise<{ title: string; description: string }> {
+  const url = new URL(VIDEO_DETAILS_URL);
+  url.searchParams.append('part', 'snippet');
+  url.searchParams.append('id', videoId);
+  url.searchParams.append('key', apiKey);
+
+  const response = await fetch(url.toString());
+  if (!response.ok) {
+    throw new Error(`YouTube API error: ${response.status}`);
+  }
+
+  const data = await response.json() as any;
+  const item = data.items?.[0];
+  
+  if (!item) {
+    throw new Error('Video not found');
+  }
+
+  return {
+    title: item.snippet.title || '',
+    description: item.snippet.description || '',
+  };
 }

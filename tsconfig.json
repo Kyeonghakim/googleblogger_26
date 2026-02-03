@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    // Environment setup & latest features
     "lib": ["ESNext"],
     "target": "ESNext",
     "module": "Preserve",
+    "types": ["@cloudflare/workers-types"],
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
@@ -25,5 +25,6 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false
-  }
+  },
+  "include": ["src"]
 }

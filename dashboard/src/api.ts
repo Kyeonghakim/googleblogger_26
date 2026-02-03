@@ -5,6 +5,8 @@ export const api = {
   post: async (path: string, body?: any) => request(path, 'POST', body),
   put: async (path: string, body?: any) => request(path, 'PUT', body),
   delete: async (path: string) => request(path, 'DELETE'),
+  createDraft: async (data: { title: string; content: string; contentType: string }) => request('/api/drafts', 'POST', data),
+  generateMarketing: async (data: { topic: string; seoKeywords?: string }) => request('/api/generate-marketing', 'POST', data),
 };
 
 async function request(path: string, method: string, body?: any) {
@@ -31,7 +33,8 @@ async function request(path: string, method: string, body?: any) {
   }
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.statusText}`);
+    const errorBody = await response.json().catch(() => ({})) as { error?: string };
+    throw new Error(errorBody.error || response.statusText || `HTTP ${response.status}`);
   }
 
   return response.json();

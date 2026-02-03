@@ -12,6 +12,9 @@ export interface PublishResponse {
 }
 
 async function getAccessToken(env: Env): Promise<string> {
+  console.log('Getting access token...');
+  console.log('Client ID prefix:', env.BLOGGER_CLIENT_ID?.substring(0, 20));
+  
   const response = await fetch('https://oauth2.googleapis.com/token', {
     method: 'POST',
     headers: {
@@ -25,13 +28,15 @@ async function getAccessToken(env: Env): Promise<string> {
     }),
   });
 
+  const responseText = await response.text();
+  console.log('Token response status:', response.status);
+  
   if (!response.ok) {
-    const errorText = await response.text();
-    // NEVER log the tokens themselves, but status and error text are fine provided they don't contain secrets
-    throw new Error(`Failed to refresh token: ${response.status} ${errorText}`);
+    throw new Error(`Failed to refresh token: ${response.status} ${responseText}`);
   }
 
-  const data: any = await response.json();
+  const data: any = JSON.parse(responseText);
+  console.log('Access token acquired, scope:', data.scope);
   return data.access_token;
 }
 
@@ -77,7 +82,6 @@ export async function publishToBlogger(env: Env, request: PublishRequest): Promi
       body: JSON.stringify({
         title: draft.title,
         content: draft.content,
-        status: 'LIVE', 
       }),
     });
 

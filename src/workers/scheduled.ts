@@ -26,6 +26,8 @@ export async function runScheduledJob(env: Env) {
 
     const result = await generatePost({
       videoId: video.videoId,
+      videoTitle: video.title,
+      videoDescription: video.description,
       contentType: contentType,
       seoKeywords: '금리, 주식, 부동산, 투자, 경제'
     }, env);

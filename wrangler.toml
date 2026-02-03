@@ -1,6 +1,10 @@
 name = "googleblogger26"
 main = "src/index.ts"
 compatibility_date = "2024-04-03"
+compatibility_flags = ["nodejs_compat"]
+
+[ai]
+binding = "AI"
 
 [[d1_databases]]
 binding = "DB"
@@ -8,4 +12,8 @@ database_name = "youtube-blogger-db"
 database_id = "ca4b13d6-1f3e-4f27-9cfe-0ed3d64011d7"
 
 [triggers]
-crons = ["0 0 * * *", "0 6 * * *"]
+crons = ["0 0 * * *", "0 6 * * *", "0 12 * * *"]
+
+[assets]
+directory = "./dashboard/dist"
+binding = "ASSETS"

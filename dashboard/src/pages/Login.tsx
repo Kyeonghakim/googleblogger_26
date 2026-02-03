@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { Lock, ArrowRight } from 'lucide-react';
 import { api } from '../api';
 
 export default function Login() {
@@ -30,31 +30,55 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-xl shadow-sm p-8 w-full max-w-md">
-        <div className="flex flex-col items-center mb-8">
-          <div className="w-12 h-12 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-            <Lock className="w-6 h-6 text-slate-600" />
+    <div className="min-h-screen bg-zinc-900 flex items-center justify-center p-4">
+      <div className="bg-white w-full max-w-sm rounded-xl shadow-2xl overflow-hidden">
+        <div className="p-8">
+          <div className="flex flex-col items-center mb-8">
+            <div className="w-12 h-12 bg-zinc-100 rounded-xl flex items-center justify-center mb-4 text-zinc-900">
+              <Lock className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl font-bold text-zinc-900 tracking-tight">관리자 로그인</h1>
+            <p className="text-sm text-zinc-500 mt-2">서비스 접속을 위해 인증이 필요합니다</p>
           </div>
-          <h1 className="text-2xl font-semibold text-slate-900">로그인</h1>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <input 
+                type="password"
+                placeholder="비밀번호"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 rounded-lg border border-zinc-200 focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent transition-all placeholder:text-zinc-400 text-sm bg-zinc-50/50"
+                autoFocus
+              />
+            </div>
+
+            {error && (
+              <div className="text-red-500 text-xs bg-red-50 p-3 rounded-lg text-center font-medium">
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit"
+              disabled={loading || !password}
+              className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-medium py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <span>로그인</span>
+                  <ArrowRight className="w-4 h-4 opacity-70 group-hover:translate-x-0.5 transition-transform" />
+                </>
+              )}
+            </button>
+          </form>
         </div>
-        <form onSubmit={handleSubmit}>
-          <input 
-            type="password"
-            placeholder="비밀번호를 입력하세요"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 mb-4"
-          />
-          {error && <p className="text-red-600 text-sm mt-2 mb-4">{error}</p>}
-          <button 
-            type="submit"
-            disabled={loading}
-            className="w-full bg-slate-900 hover:bg-slate-800 text-white py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-          >
-            {loading ? '로그인 중...' : '로그인'}
-          </button>
-        </form>
+        
+        <div className="bg-zinc-50 py-4 text-center border-t border-zinc-100">
+          <p className="text-xs text-zinc-400">© 2024 Google Blogger Automation</p>
+        </div>
       </div>
     </div>
   );

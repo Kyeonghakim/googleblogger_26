@@ -47,9 +47,10 @@ export default function DraftDetail() {
     setProcessing(true);
     try {
       await api.post('/api/publish', { draftId: Number(id) });
+      alert('발행 완료! 블로그에 게시되었습니다.');
       navigate('/');
-    } catch (err) {
-      alert('발행 실패');
+    } catch (err: any) {
+      alert(`발행 실패: ${err.message || '알 수 없는 오류'}`);
     } finally {
       setProcessing(false);
     }
@@ -68,55 +69,58 @@ export default function DraftDetail() {
     }
   };
 
-  if (loading) return <div className="text-gray-500 p-8">로딩 중...</div>;
-  if (!draft) return <div className="text-gray-500 p-8">글을 찾을 수 없습니다.</div>;
+  if (loading) return <div className="text-zinc-500 p-8 text-center">로딩 중...</div>;
+  if (!draft) return <div className="text-zinc-500 p-8 text-center">글을 찾을 수 없습니다.</div>;
 
   return (
     <div className="space-y-6 max-w-5xl mx-auto p-6">
       <div className="flex items-center gap-4">
         <button 
           onClick={() => navigate('/')} 
-          className="p-2 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+          className="p-2 hover:bg-zinc-100 rounded-lg transition-colors cursor-pointer"
         >
-          <ArrowLeft className="w-5 h-5 text-slate-600" />
+          <ArrowLeft className="w-5 h-5 text-zinc-500" />
         </button>
-        <h1 className="text-2xl font-semibold text-slate-900">글 수정</h1>
+        <h1 className="text-2xl font-semibold text-zinc-900">글 수정</h1>
       </div>
       
-      <div className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">제목</label>
+      <div className="bg-white border border-zinc-100 rounded-xl p-8 shadow-sm space-y-8">
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-500">제목</label>
           <input 
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 transition-shadow"
+            className="w-full px-0 py-3 text-2xl font-semibold text-zinc-900 placeholder-zinc-300 border-b border-zinc-200 focus:border-zinc-900 focus:outline-none transition-colors bg-transparent"
+            placeholder="제목을 입력하세요"
           />
         </div>
         
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">내용</label>
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-zinc-500">내용</label>
           <textarea 
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            rows={12} 
-            className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-slate-900 font-mono text-sm transition-shadow resize-y"
+            rows={15} 
+            className="w-full p-4 rounded-xl border border-zinc-200 text-zinc-700 leading-relaxed resize-y focus:outline-none focus:ring-2 focus:ring-zinc-100 transition-all font-sans text-base"
+            placeholder="내용을 작성하세요..."
           />
         </div>
         
-        <div className="flex items-center justify-between pt-4 border-t border-slate-200">
+        <div className="flex items-center justify-between pt-6 border-t border-zinc-100">
           <button 
             onClick={handleDelete}
             disabled={processing}
-            className="px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+            className="px-4 py-2.5 text-red-600 hover:bg-red-50 rounded-lg transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50 font-medium text-sm"
           >
             <Trash2 className="w-4 h-4" />
             삭제
           </button>
+          
           <div className="flex items-center gap-3">
             <button 
               onClick={handleSave}
               disabled={processing}
-              className="px-4 py-2 border border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 text-zinc-700 bg-white border border-zinc-200 hover:bg-zinc-50 hover:border-zinc-300 rounded-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 font-medium text-sm shadow-sm"
             >
               <Save className="w-4 h-4" />
               저장
@@ -124,7 +128,7 @@ export default function DraftDetail() {
             <button 
               onClick={handlePublish}
               disabled={processing}
-              className="px-4 py-2 bg-slate-900 text-white hover:bg-slate-800 rounded-lg font-medium transition-colors flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              className="px-5 py-2.5 text-white bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50 font-medium text-sm shadow-sm hover:shadow-md"
             >
               <Send className="w-4 h-4" />
               발행

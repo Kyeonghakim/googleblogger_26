@@ -8,3 +8,5 @@
 - Always use the `--local` flag when executing D1 commands if remote authentication is not configured.
 - Wrangler stores local D1 state in `.wrangler/state/v3/d1`.
 - SQL migrations can be applied using `npx wrangler d1 execute <db-name> --local --file <path-to-sql>`.
+## Compatibility (2026-02-01)
+- Added 'nodejs_compat' to compatibility_flags in wrangler.toml to support 'youtube-transcript' library in Workers environment.
