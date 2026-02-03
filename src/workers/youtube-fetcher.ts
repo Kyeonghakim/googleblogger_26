@@ -1,6 +1,6 @@
 import type { Env, VideoInfo } from '../types';
 
-const KEYWORDS = ["금리", "주식", "부동산", "투자", "경제", "Fed", "inflation", "S&P500"];
+const KEYWORDS = ["재테크", "주식 투자", "부동산 전망", "경제 뉴스", "ETF 추천", "미국 주식", "절세", "금융 상식"];
 const MAX_VIDEOS_PER_KEYWORD = 2;
 const SEARCH_URL = 'https://www.googleapis.com/youtube/v3/search';
 const VIDEO_DETAILS_URL = 'https://www.googleapis.com/youtube/v3/videos';
@@ -34,7 +34,7 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
 
       for (const item of data.items) {
         const videoId = item.id.videoId;
-        
+
         if (processedVideoIds.has(videoId)) continue;
         processedVideoIds.add(videoId);
 
@@ -49,7 +49,7 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
 
         try {
           const details = await getVideoDetails(videoId, env.YOUTUBE_API_KEY);
-          
+
           if (!details.description || details.description.length < 100) {
             console.log(`Skipping video ${videoId} (description too short)`);
             continue;
@@ -62,7 +62,7 @@ export async function fetchVideos(env: Env): Promise<VideoInfo[]> {
             channelTitle: item.snippet.channelTitle,
             publishedAt: item.snippet.publishedAt,
           });
-          
+
           console.log(`Collected video: ${details.title || item.snippet.title}`);
 
           if (collectedVideos.length >= 2) {
@@ -94,7 +94,7 @@ async function getVideoDetails(videoId: string, apiKey: string): Promise<{ title
 
   const data = await response.json() as any;
   const item = data.items?.[0];
-  
+
   if (!item) {
     throw new Error('Video not found');
   }
